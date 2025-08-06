@@ -1,15 +1,26 @@
-# Mock ERP - FastAPI Application
+# Mock ERP Teste - Master Assistant
 
-Sistema de gestão empresarial mock desenvolvido com FastAPI.
+Sistema de gestão empresarial mock desenvolvido com FastAPI e assistente virtual inteligente.
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Funcionalidades
 
-- **FastAPI** - Framework web moderno e rápido para APIs
-- **Uvicorn** - Servidor ASGI para FastAPI
-- **Pydantic** - Validação de dados e serialização
-- **Requests/HTTPX** - Para consumo de APIs externas
-- **Pandas & Numpy** - Processamento e análise de dados
-- **Python-dotenv** - Gerenciamento de variáveis de ambiente
+- **FastAPI Backend** - Framework web moderno com documentação automática de API
+- **Assistente Virtual** - Sistema de diálogo inteligente que coleta dados de produtos e fornece assistência com IA
+- **Gestão de Produtos** - Sistema completo de cadastro de produtos com 6 categorias (Eletrônicos, Roupas, Casa & Jardim, Esportes, Livros, Saúde & Beleza)
+- **Frontend Moderno** - Interface HTML/CSS/JavaScript responsiva com design profissional
+- **Integração de APIs** - Pronto para consumo de APIs externas e integração com serviços de IA
+- **Configuração de Ambiente** - Gerenciamento flexível de configurações
+- **Suporte CORS** - Compartilhamento de recursos entre origens habilitado
+- **Monitoramento** - Endpoints de health check integrados
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Backend**: FastAPI 0.116.1, Uvicorn, Pydantic
+- **Frontend**: HTML5, CSS3 (Grid/Flexbox), JavaScript Vanilla
+- **Python**: 3.13.4 com ambiente virtual
+- **Cliente API**: Requests, HTTPX
+- **Processamento de Dados**: Pandas, NumPy
+- **Configuração**: python-dotenv
 
 ## 📁 Estrutura do Projeto
 
