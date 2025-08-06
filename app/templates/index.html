@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock ERP - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .card {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+        .virtual-assistant {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .virtual-assistant:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .api-test {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #apiResult {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 50px;
+        }
+        .product-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .product-form .full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            margin-top: 5px;
+        }
+        .image-preview img {
+            max-width: 90px;
+            max-height: 90px;
+            border-radius: 4px;
+        }
+        .product-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .product-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+        }
+        .btn-electronics {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-electronics:hover {
+            background-color: #218838;
+        }
+        .btn-clothing {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .btn-clothing:hover {
+            background-color: #e0a800;
+        }
+        .btn-books {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .btn-books:hover {
+            background-color: #5a359b;
+        }
+        .btn-home {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .btn-home:hover {
+            background-color: #e8650e;
+        }
+        .btn-sports {
+            background-color: #20c997;
+            color: white;
+        }
+        .btn-sports:hover {
+            background-color: #1ba085;
+        }
+        .btn-beauty {
+            background-color: #e83e8c;
+            color: white;
+        }
+        .btn-beauty:hover {
+            background-color: #d91a72;
+        }
+        
+        /* Dialog do Assistente Virtual */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dialog-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .dialog-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .dialog-header h3 {
+            margin: 0;
+            color: #333;
+            flex: 1;
+        }
+        
+        .close-dialog {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-dialog:hover {
+            color: #333;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+        }
+        
+        .product-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .product-info h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .product-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .question-area {
+            margin-bottom: 20px;
+        }
+        
+        .question-area label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .question-area textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn-send {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-send:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mock ERP - Sistema de Gestão</h1>
+        
+        <div class="card">
+            <button class="virtual-assistant" title="Assistente Virtual" onclick="openAssistantDialog()">
+                🤖
+            </button>
+            <h3>Cadastro de Produtos</h3>
+            <p>Simulação de tela de cadastro de produtos do sistema ERP:</p>
+            
+            <div class="product-form">
+                <div class="form-group">
+                    <label for="productCode">Código do Produto:</label>
+                    <input type="text" id="productCode" placeholder="Ex: PRD001">
+                </div>
+                
+                <div class="form-group">
+                    <label for="productName">Nome do Produto:</label>
+                    <input type="text" id="productName" placeholder="Ex: Smartphone Samsung">
+                </div>
+                
+                <div class="form-group">
+                    <label for="productEan">EAN:</label>
+                    <input type="text" id="productEan" placeholder="Ex: 7891234567890">
+                </div>
+                
+                <div class="form-group">
+                    <label for="productRef">Referência:</label>
+                    <input type="text" id="productRef" placeholder="Ex: SM-A125F">
+                </div>
+                
+                <div class="form-group">
+                    <label for="productQty">Quantidade:</label>
+                    <input type="number" id="productQty" placeholder="Ex: 50">
+                </div>
+                
+                <div class="form-group">
+                    <label for="productCategory">Categoria:</label>
+                    <select id="productCategory">
+                        <option value="">Selecione uma categoria</option>
+                        <option value="eletronicos">Eletrônicos</option>
+                        <option value="roupas">Roupas</option>
+                        <option value="livros">Livros</option>
+                        <option value="casa">Casa e Jardim</option>
+                        <option value="esportes">Esportes</option>
+                        <option value="beleza">Beleza e Cuidados</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productImage">Imagem do Produto:</label>
+                    <input type="file" id="productImage" accept="image/*" onchange="previewImage(event)">
+                    <div class="image-preview" id="imagePreview">
+                        <span style="color: #999;">Sem imagem</span>
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="productDesc">Descrição:</label>
+                    <textarea id="productDesc" placeholder="Descreva as características do produto..."></textarea>
+                </div>
+            </div>
+            
+            <div class="product-buttons">
+                <button class="product-btn btn-electronics" onclick="loadElectronicsProduct()">
+                    📱 Eletrônico
+                </button>
+                <button class="product-btn btn-clothing" onclick="loadClothingProduct()">
+                    👕 Roupa
+                </button>
+                <button class="product-btn btn-books" onclick="loadBookProduct()">
+                    📚 Livro
+                </button>
+                <button class="product-btn btn-home" onclick="loadHomeProduct()">
+                    🏠 Casa
+                </button>
+                <button class="product-btn btn-sports" onclick="loadSportsProduct()">
+                    ⚽ Esportes
+                </button>
+                <button class="product-btn btn-beauty" onclick="loadBeautyProduct()">
+                    💄 Beleza
+                </button>
+            </div>
+        </div>
+
+        <div class="api-test">
+            <h3>Teste de API Externa</h3>
+            <p>Clique no botão abaixo para testar o consumo de uma API externa:</p>
+            <button onclick="testExternalAPI()">Testar API Externa</button>
+            <div id="apiResult"></div>
+        </div>
+    </div>
+
+    <!-- Dialog do Assistente Virtual -->
+    <div class="dialog-overlay" id="assistantDialog">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <span style="font-size: 24px;">🤖</span>
+                <h3>Assistente Virtual - ERP</h3>
+                <button class="close-dialog" onclick="closeAssistantDialog()">×</button>
+            </div>
+            
+            <div class="product-info" id="productInfo">
+                <h4>Produto Selecionado:</h4>
+                <p id="selectedProduct">Nenhum produto selecionado</p>
+            </div>
+            
+            <div class="question-area">
+                <label for="userQuestion">Como posso ajudar você com este produto?</label>
+                <textarea 
+                    id="userQuestion" 
+                    placeholder="Digite sua dúvida ou solicitação sobre este produto. Ex: 'Como cadastrar variações deste produto?' ou 'Qual o melhor preço de venda?'"
+                ></textarea>
+            </div>
+            
+            <div class="dialog-actions">
+                <button class="btn-cancel" onclick="closeAssistantDialog()">Cancelar</button>
+                <button class="btn-send" onclick="sendToAssistant()">Enviar Pergunta</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testExternalAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = 'Carregando...';
+            
+            try {
+                const response = await fetch('/api/test-external');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <h4>Sucesso!</h4>
+                        <p><strong>Título:</strong> ${data.external_data.title}</p>
+                        <p><strong>Conteúdo:</strong> ${data.external_data.body}</p>
+                        <p><strong>ID:</strong> ${data.external_data.id}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Erro: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Erro de conexão: ${error.message}</p>`;
+            }
+        }
+
+        // Função para preview da imagem
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '<span style="color: #999;">Sem imagem</span>';
+            }
+        }
+
+        // Função para carregar produto eletrônico
+        function loadElectronicsProduct() {
+            document.getElementById('productCode').value = 'ELE001';
+            document.getElementById('productName').value = 'Smartphone Samsung Galaxy A32';
+            document.getElementById('productEan').value = '7891234567890';
+            document.getElementById('productRef').value = 'SM-A325F';
+            document.getElementById('productQty').value = '25';
+            document.getElementById('productCategory').value = 'eletronicos';
+            document.getElementById('productDesc').value = 'Smartphone Android com tela de 6.4", 128GB de armazenamento, câmera quádrupla de 64MP, bateria de 5000mAh e processador MediaTek Helio G80.';
+            
+            // Simular imagem
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '<div style="background: linear-gradient(45deg, #007bff, #0056b3); color: white; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px;">📱</div>';
+        }
+
+        // Função para carregar produto de roupa
+        function loadClothingProduct() {
+            document.getElementById('productCode').value = 'ROU001';
+            document.getElementById('productName').value = 'Camiseta Polo Masculina';
+            document.getElementById('productEan').value = '7891234567891';
+            document.getElementById('productRef').value = 'POL-M-AZ';
+            document.getElementById('productQty').value = '40';
+            document.getElementById('productCategory').value = 'roupas';
+            document.getElementById('productDesc').value = 'Camiseta polo masculina 100% algodão, cor azul marinho, tamanho M. Gola com botões, manga curta, corte regular. Ideal para uso casual e social.';
+            
+            // Simular imagem
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '<div style="background: linear-gradient(45deg, #ffc107, #e0a800); color: #333; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px;">👕</div>';
+        }
+
+        // Função para carregar produto livro
+        function loadBookProduct() {
+            document.getElementById('productCode').value = 'LIV001';
+            document.getElementById('productName').value = 'Clean Code - Código Limpo';
+            document.getElementById('productEan').value = '7891234567892';
+            document.getElementById('productRef').value = 'CC-MARTIN';
+            document.getElementById('productQty').value = '15';
+            document.getElementById('productCategory').value = 'livros';
+            document.getElementById('productDesc').value = 'Livro sobre boas práticas de programação por Robert C. Martin. Ensina como escrever código limpo, legível e manutenível. Essencial para desenvolvedores de software.';
+            
+            // Simular imagem
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '<div style="background: linear-gradient(45deg, #6f42c1, #5a359b); color: white; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px;">📚</div>';
+        }
+
+        // Função para carregar produto casa e jardim
+        function loadHomeProduct() {
+            document.getElementById('productCode').value = 'CAS001';
+            document.getElementById('productName').value = 'Aspirador de Pó Robô';
+            document.getElementById('productEan').value = '7891234567893';
+            document.getElementById('productRef').value = 'ROBOT-V10';
+            document.getElementById('productQty').value = '8';
+            document.getElementById('productCategory').value = 'casa';
+            document.getElementById('productDesc').value = 'Aspirador de pó robô inteligente com mapeamento laser, sucção de 2700Pa, bateria de 5200mAh para até 3 horas de limpeza, compatível com app móvel e assistentes virtuais.';
+            
+            // Simular imagem
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '<div style="background: linear-gradient(45deg, #fd7e14, #e8650e); color: white; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px;">🏠</div>';
+        }
+
+        // Função para carregar produto esportivo
+        function loadSportsProduct() {
+            document.getElementById('productCode').value = 'ESP001';
+            document.getElementById('productName').value = 'Tênis de Corrida Nike Air Max';
+            document.getElementById('productEan').value = '7891234567894';
+            document.getElementById('productRef').value = 'AIR-MAX-270';
+            document.getElementById('productQty').value = '30';
+            document.getElementById('productCategory').value = 'esportes';
+            document.getElementById('productDesc').value = 'Tênis de corrida masculino com tecnologia Air Max, amortecimento responsivo, cabedal em mesh respirável, sola de borracha antiderrapante. Ideal para caminhadas e corridas.';
+            
+            // Simular imagem
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '<div style="background: linear-gradient(45deg, #20c997, #1ba085); color: white; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px;">⚽</div>';
+        }
+
+        // Função para carregar produto de beleza
+        function loadBeautyProduct() {
+            document.getElementById('productCode').value = 'BEL001';
+            document.getElementById('productName').value = 'Base Líquida Matte HD';
+            document.getElementById('productEan').value = '7891234567895';
+            document.getElementById('productRef').value = 'BASE-HD-30ML';
+            document.getElementById('productQty').value = '60';
+            document.getElementById('productCategory').value = 'beleza';
+            document.getElementById('productDesc').value = 'Base líquida de alta cobertura com acabamento matte, longa duração de 16 horas, FPS 20, fórmula oil-free e não comedogênica. Disponível em 20 tons diferentes.';
+            
+            // Simular imagem
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '<div style="background: linear-gradient(45deg, #e83e8c, #d91a72); color: white; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px;">💄</div>';
+        }
+
+        // Funções do Assistente Virtual
+        function openAssistantDialog() {
+            // Coletar informações do produto atual
+            const productData = getProductData();
+            
+            // Atualizar a exibição no dialog
+            updateProductInfo(productData);
+            
+            // Mostrar o dialog
+            document.getElementById('assistantDialog').style.display = 'flex';
+            
+            // Focar no textarea
+            setTimeout(() => {
+                document.getElementById('userQuestion').focus();
+            }, 100);
+        }
+
+        function closeAssistantDialog() {
+            document.getElementById('assistantDialog').style.display = 'none';
+            document.getElementById('userQuestion').value = '';
+        }
+
+        function getProductData() {
+            const productCode = document.getElementById('productCode').value;
+            const productName = document.getElementById('productName').value;
+            const productEan = document.getElementById('productEan').value;
+            const productRef = document.getElementById('productRef').value;
+            const productQty = document.getElementById('productQty').value;
+            const productCategory = document.getElementById('productCategory').value;
+            const productDesc = document.getElementById('productDesc').value;
+            
+            // Determinar qual produto está selecionado baseado nos dados
+            let selectedProductType = 'Personalizado';
+            if (productCode === 'ELE001') selectedProductType = 'Eletrônico - Smartphone';
+            else if (productCode === 'ROU001') selectedProductType = 'Roupa - Camiseta Polo';
+            else if (productCode === 'LIV001') selectedProductType = 'Livro - Clean Code';
+            else if (productCode === 'CAS001') selectedProductType = 'Casa - Aspirador Robô';
+            else if (productCode === 'ESP001') selectedProductType = 'Esportes - Tênis Nike';
+            else if (productCode === 'BEL001') selectedProductType = 'Beleza - Base Matte';
+            
+            return {
+                selectedType: selectedProductType,
+                code: productCode || 'Não informado',
+                name: productName || 'Não informado',
+                ean: productEan || 'Não informado',
+                reference: productRef || 'Não informado',
+                quantity: productQty || 'Não informado',
+                category: productCategory || 'Não selecionada',
+                description: productDesc || 'Não informada',
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        function updateProductInfo(productData) {
+            const productInfoElement = document.getElementById('selectedProduct');
+            
+            if (productData.code === 'Não informado' && productData.name === 'Não informado') {
+                productInfoElement.innerHTML = `
+                    <span style="color: #ff6b6b;">⚠️ Nenhum produto preenchido</span><br>
+                    <small>Preencha os dados do produto ou selecione um dos exemplos acima.</small>
+                `;
+            } else {
+                productInfoElement.innerHTML = `
+                    <strong>${productData.selectedType}</strong><br>
+                    <strong>Código:</strong> ${productData.code}<br>
+                    <strong>Nome:</strong> ${productData.name}<br>
+                    <strong>Categoria:</strong> ${productData.category}<br>
+                    <strong>Quantidade:</strong> ${productData.quantity}
+                `;
+            }
+        }
+
+        function sendToAssistant() {
+            const productData = getProductData();
+            const userQuestion = document.getElementById('userQuestion').value.trim();
+            
+            if (!userQuestion) {
+                alert('Por favor, digite sua pergunta ou solicitação.');
+                return;
+            }
+            
+            // Criar o JSON com todas as informações
+            const assistantRequest = {
+                product: productData,
+                userQuestion: userQuestion,
+                requestId: generateRequestId(),
+                timestamp: new Date().toISOString()
+            };
+            
+            // Por enquanto, apenas mostrar o JSON no console e em um alert
+            console.log('Dados para o Assistente Virtual:', JSON.stringify(assistantRequest, null, 2));
+            
+            // Simular envio
+            alert('Pergunta enviada para o assistente virtual!\n\nDados coletados:\n' + 
+                  JSON.stringify(assistantRequest, null, 2));
+            
+            // Fechar o dialog
+            closeAssistantDialog();
+            
+            // Aqui futuramente será feita a chamada para a API
+            // sendToAssistantAPI(assistantRequest);
+        }
+
+        function generateRequestId() {
+            return 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Fechar dialog com ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAssistantDialog();
+            }
+        });
+
+        // Test health check on page load
+        window.onload = async function() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                console.log('Health check:', data);
+            } catch (error) {
+                console.error('Health check failed:', error);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Project dependencies
+# Web framework
+fastapi
+uvicorn[standard]
+
+# API consumption
+requests
+httpx
+
+# Frontend/Template engine
+jinja2
+
+# Data handling
+pandas
+numpy
+
+# Environment variables
+python-dotenv
+
+# JSON handling
+jsonschema
+pydantic
+
+# Date handling
+python-dateutil
+
+# Development tools
+pytest
+pytest-asyncio
