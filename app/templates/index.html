@@ -1316,59 +1316,81 @@
             <h3>👤 Gestão de Usuários</h3>
             <p>Controle de acesso e permissões do sistema:</p>
             
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="usuarioNome">Nome Completo:</label>
-                    <input type="text" id="usuarioNome" placeholder="Ex: Ana Silva Santos">
+            <!-- Sistema de Abas -->
+            <div class="tab-system">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchUsuarioTab('listagem')">
+                        📋 Listagem
+                    </button>
+                    <button class="tab-btn" onclick="switchUsuarioTab('cadastro')">
+                        ➕ Cadastro/Edição
+                    </button>
                 </div>
                 
-                <div class="form-group">
-                    <label for="usuarioLogin">Login/Usuário:</label>
-                    <input type="text" id="usuarioLogin" placeholder="Ex: ana.silva">
+                <!-- Aba Listagem -->
+                <div class="tab-content active" id="usuarioListagem">
+                    <div class="items-list" id="usuariosList">
+                        <!-- Lista será preenchida via JavaScript -->
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="usuarioEmail">E-mail:</label>
-                    <input type="email" id="usuarioEmail" placeholder="Ex: ana@empresa.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="usuarioSenha">Senha:</label>
-                    <input type="password" id="usuarioSenha" placeholder="Digite a senha">
-                </div>
-                
-                <div class="form-group">
-                    <label for="usuarioPerfil">Perfil de Acesso:</label>
-                    <select id="usuarioPerfil">
-                        <option value="">Selecione o perfil</option>
-                        <option value="admin">Administrador</option>
-                        <option value="vendedor">Vendedor</option>
-                        <option value="operador">Operador</option>
-                        <option value="consulta">Apenas Consulta</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="usuarioStatus">Status:</label>
-                    <select id="usuarioStatus">
-                        <option value="">Selecione o status</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                        <option value="bloqueado">Bloqueado</option>
-                    </select>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="usuarioObservacoes">Observações:</label>
-                    <textarea id="usuarioObservacoes" placeholder="Informações adicionais sobre o usuário..."></textarea>
+                <!-- Aba Cadastro -->
+                <div class="tab-content" id="usuarioCadastro">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="usuarioNome">Nome Completo:</label>
+                            <input type="text" id="usuarioNome" placeholder="Ex: Ana Silva Santos">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="usuarioLogin">Login/Usuário:</label>
+                            <input type="text" id="usuarioLogin" placeholder="Ex: ana.silva">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="usuarioEmail">E-mail:</label>
+                            <input type="email" id="usuarioEmail" placeholder="Ex: ana@empresa.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="usuarioSenha">Senha:</label>
+                            <input type="password" id="usuarioSenha" placeholder="Digite a senha">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="usuarioPerfil">Perfil de Acesso:</label>
+                            <select id="usuarioPerfil">
+                                <option value="">Selecione o perfil</option>
+                                <option value="admin">Administrador</option>
+                                <option value="vendedor">Vendedor</option>
+                                <option value="operador">Operador</option>
+                                <option value="consulta">Apenas Consulta</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="usuarioStatus">Status:</label>
+                            <select id="usuarioStatus">
+                                <option value="">Selecione o status</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="bloqueado">Bloqueado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="usuarioObservacoes">Observações:</label>
+                            <textarea id="usuarioObservacoes" placeholder="Informações adicionais sobre o usuário..."></textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <div class="action-buttons">
                 <button class="btn-info" onclick="voltarAoMenu()">🔙 Voltar ao Menu</button>
                 <button class="btn-primary" onclick="salvarUsuario()">💾 Salvar Usuário</button>
-                <button class="btn-secondary" onclick="resetarSenha()">🔑 Resetar Senha</button>
-                <button class="btn-warning" onclick="bloquearUsuario()">🚫 Bloquear</button>
+                <button class="btn-secondary" onclick="novoUsuario()">➕ Novo Usuário</button>
+                <button class="btn-danger" onclick="limparFormUsuario()">�️ Limpar Formulário</button>
             </div>
         </div>
         
@@ -2527,6 +2549,9 @@
                 if (typeof loadNotasFiscaisList === 'function') {
                     loadNotasFiscaisList();
                 }
+                if (typeof loadUsuariosList === 'function') {
+                    loadUsuariosList();
+                }
             } catch (error) {
                 console.error('Health check failed:', error);
             }
@@ -2635,6 +2660,8 @@
                     hideAllCards();
                     showCommonCards(); // Manter menu principal visível
                     showCardById('usuariosCard');
+                    // Inicializar na aba de listagem
+                    switchUsuarioTab('listagem');
                     break;
                     
                 case 'empresa':
@@ -4137,6 +4164,303 @@
         
         function verHistorico() {
             showTemporaryMessage('📊 Histórico', 'Funcionalidade de histórico em desenvolvimento');
+        }
+        
+        // Mock data para usuários
+        let usuariosMock = [
+            {
+                id: 1,
+                nome: "João Silva",
+                login: "joao.silva",
+                email: "joao@example.com",
+                perfil: "admin",
+                status: "ativo",
+                observacoes: "Administrador principal do sistema. Acesso total às funcionalidades.",
+                dataUltimoAcesso: "2024-08-08",
+                horaUltimoAcesso: "09:30"
+            },
+            {
+                id: 2,
+                nome: "Maria Santos",
+                login: "maria.santos",
+                email: "maria@example.com",
+                perfil: "vendedor",
+                status: "ativo",
+                observacoes: "Vendedora sênior com foco em grandes contas. Excelente histórico de vendas.",
+                dataUltimoAcesso: "2024-08-08",
+                horaUltimoAcesso: "10:15"
+            },
+            {
+                id: 3,
+                nome: "Pedro Oliveira",
+                login: "pedro.oliveira",
+                email: "pedro@example.com",
+                perfil: "operador",
+                status: "inativo",
+                observacoes: "Operador de sistema. Responsável pela entrada de dados e relatórios básicos.",
+                dataUltimoAcesso: "2024-08-05",
+                horaUltimoAcesso: "16:45"
+            },
+            {
+                id: 4,
+                nome: "Ana Costa",
+                login: "ana.costa",
+                email: "ana@example.com",
+                perfil: "vendedor",
+                status: "ativo",
+                observacoes: "Vendedora junior. Em treinamento para atendimento de clientes corporativos.",
+                dataUltimoAcesso: "2024-08-08",
+                horaUltimoAcesso: "08:45"
+            },
+            {
+                id: 5,
+                nome: "Carlos Admin",
+                login: "carlos.admin",
+                email: "carlos@example.com",
+                perfil: "admin",
+                status: "bloqueado",
+                observacoes: "Conta bloqueada temporariamente por suspeita de acesso não autorizado.",
+                dataUltimoAcesso: "2024-08-03",
+                horaUltimoAcesso: "22:30"
+            }
+        ];
+        
+        let selectedUsuarioId = null;
+        
+        // Função para alternar entre abas dos usuários
+        function switchUsuarioTab(tab) {
+            // Atualizar botões das abas
+            const tabButtons = document.querySelectorAll('#usuariosCard .tab-btn');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Atualizar conteúdo das abas
+            const tabContents = document.querySelectorAll('#usuariosCard .tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'listagem') {
+                tabButtons[0].classList.add('active');
+                document.getElementById('usuarioListagem').classList.add('active');
+                loadUsuariosList();
+            } else if (tab === 'cadastro') {
+                tabButtons[1].classList.add('active');
+                document.getElementById('usuarioCadastro').classList.add('active');
+            }
+        }
+        
+        // Função para carregar a lista de usuários
+        function loadUsuariosList() {
+            const usuariosList = document.getElementById('usuariosList');
+            
+            if (usuariosMock.length === 0) {
+                usuariosList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6c757d;">
+                        <h4>👤 Nenhum usuário cadastrado</h4>
+                        <p>Clique em "Cadastro/Edição" para criar o primeiro usuário.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const usuariosHTML = usuariosMock.map(usuario => `
+                <div class="item-row ${selectedUsuarioId === usuario.id ? 'selected' : ''}" 
+                     onclick="selectUsuario(${usuario.id})">
+                    <div class="item-info">
+                        <div class="item-name">${usuario.nome} (${usuario.login})</div>
+                        <div class="item-details">
+                            📧 ${usuario.email} | 
+                            👤 ${getPerfilName(usuario.perfil)} | 
+                            🕒 Último acesso: ${formatDate(usuario.dataUltimoAcesso)} às ${usuario.horaUltimoAcesso}
+                        </div>
+                    </div>
+                    <div class="item-status">
+                        <span class="${getStatusUsuarioClass(usuario.status)}">
+                            ${getStatusUsuarioIcon(usuario.status)} ${getStatusUsuarioName(usuario.status)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            usuariosList.innerHTML = usuariosHTML;
+        }
+        
+        // Funções auxiliares para perfis e status
+        function getPerfilName(perfil) {
+            const perfis = {
+                'admin': 'Administrador',
+                'vendedor': 'Vendedor',
+                'operador': 'Operador',
+                'consulta': 'Apenas Consulta'
+            };
+            return perfis[perfil] || perfil;
+        }
+        
+        function getStatusUsuarioName(status) {
+            const statusMap = {
+                'ativo': 'Ativo',
+                'inativo': 'Inativo',
+                'bloqueado': 'Bloqueado'
+            };
+            return statusMap[status] || status;
+        }
+        
+        function getStatusUsuarioIcon(status) {
+            const icons = {
+                'ativo': '✅',
+                'inativo': '⚪',
+                'bloqueado': '🚫'
+            };
+            return icons[status] || '❓';
+        }
+        
+        function getStatusUsuarioClass(status) {
+            const classes = {
+                'ativo': 'status-active',
+                'inativo': 'status-inactive',
+                'bloqueado': 'status-warning'
+            };
+            return classes[status] || 'status-inactive';
+        }
+        
+        // Função para selecionar um usuário da lista
+        function selectUsuario(usuarioId) {
+            selectedUsuarioId = usuarioId;
+            const usuario = usuariosMock.find(u => u.id === usuarioId);
+            
+            if (usuario) {
+                // Preencher o formulário com os dados do usuário
+                document.getElementById('usuarioNome').value = usuario.nome;
+                document.getElementById('usuarioLogin').value = usuario.login;
+                document.getElementById('usuarioEmail').value = usuario.email;
+                document.getElementById('usuarioPerfil').value = usuario.perfil;
+                document.getElementById('usuarioStatus').value = usuario.status;
+                document.getElementById('usuarioObservacoes').value = usuario.observacoes;
+                
+                // Limpar campo de senha por segurança
+                document.getElementById('usuarioSenha').value = '';
+                
+                // Selecionar o usuário no spinner de "Usuário Conectado"
+                const userSelect = document.getElementById('userSelect');
+                const userData = JSON.stringify({
+                    id: usuario.id,
+                    name: usuario.nome,
+                    email: usuario.email,
+                    active: usuario.status === 'ativo'
+                });
+                
+                // Verificar se a opção já existe no select
+                let optionExists = false;
+                for (let option of userSelect.options) {
+                    if (option.value) {
+                        const existingUser = JSON.parse(option.value);
+                        if (existingUser.id === usuario.id) {
+                            userSelect.value = option.value;
+                            optionExists = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Se a opção não existe, criar uma nova (caso o usuário tenha sido editado)
+                if (!optionExists) {
+                    const newOption = new Option(`${usuario.nome} (${usuario.email})`, userData);
+                    userSelect.add(newOption);
+                    userSelect.value = userData;
+                }
+                
+                // Disparar o evento de mudança para atualizar a interface
+                selectUser();
+                
+                // Alternar para a aba de cadastro
+                switchUsuarioTab('cadastro');
+                
+                // Atualizar a lista para mostrar o item selecionado
+                loadUsuariosList();
+                
+                showTemporaryMessage('👤 Usuário', `Usuário "${usuario.nome}" carregado para edição e conectado ao sistema`);
+            }
+        }
+        
+        function salvarUsuario() {
+            const nome = document.getElementById('usuarioNome').value;
+            const login = document.getElementById('usuarioLogin').value;
+            const email = document.getElementById('usuarioEmail').value;
+            const senha = document.getElementById('usuarioSenha').value;
+            const perfil = document.getElementById('usuarioPerfil').value;
+            const status = document.getElementById('usuarioStatus').value;
+            const observacoes = document.getElementById('usuarioObservacoes').value;
+            
+            if (!nome || !login || !email || !perfil) {
+                alert('Por favor, preencha os campos obrigatórios: Nome, Login, E-mail e Perfil');
+                return;
+            }
+            
+            // Verificar se o login já existe (exceto para o usuário atual)
+            const loginExistente = usuariosMock.find(u => u.login === login && u.id !== selectedUsuarioId);
+            if (loginExistente) {
+                alert('Este login já está em uso por outro usuário');
+                return;
+            }
+            
+            // Verificar se o email já existe (exceto para o usuário atual)
+            const emailExistente = usuariosMock.find(u => u.email === email && u.id !== selectedUsuarioId);
+            if (emailExistente) {
+                alert('Este e-mail já está em uso por outro usuário');
+                return;
+            }
+            
+            const usuarioData = {
+                nome,
+                login,
+                email,
+                perfil,
+                status: status || 'ativo',
+                observacoes,
+                dataUltimoAcesso: new Date().toISOString().split('T')[0],
+                horaUltimoAcesso: new Date().toTimeString().slice(0, 5)
+            };
+            
+            if (selectedUsuarioId) {
+                // Editar usuário existente
+                const index = usuariosMock.findIndex(u => u.id === selectedUsuarioId);
+                if (index !== -1) {
+                    usuariosMock[index] = { ...usuariosMock[index], ...usuarioData };
+                    showTemporaryMessage('👤 Usuário', 'Usuário atualizado com sucesso!');
+                }
+            } else {
+                // Criar novo usuário
+                if (!senha) {
+                    alert('Por favor, digite uma senha para o novo usuário');
+                    return;
+                }
+                const novoId = Math.max(...usuariosMock.map(u => u.id)) + 1;
+                usuariosMock.push({ id: novoId, ...usuarioData });
+                showTemporaryMessage('👤 Usuário', 'Usuário cadastrado com sucesso!');
+            }
+            
+            // Limpar seleção e voltar para listagem
+            selectedUsuarioId = null;
+            limparFormUsuario();
+            switchUsuarioTab('listagem');
+        }
+        
+        function novoUsuario() {
+            selectedUsuarioId = null;
+            limparFormUsuario();
+            switchUsuarioTab('cadastro');
+            showTemporaryMessage('➕ Novo', 'Formulário preparado para novo usuário');
+        }
+        
+        function limparFormUsuario() {
+            document.getElementById('usuarioNome').value = '';
+            document.getElementById('usuarioLogin').value = '';
+            document.getElementById('usuarioEmail').value = '';
+            document.getElementById('usuarioSenha').value = '';
+            document.getElementById('usuarioPerfil').value = '';
+            document.getElementById('usuarioStatus').value = '';
+            document.getElementById('usuarioObservacoes').value = '';
+            
+            selectedUsuarioId = null;
+            loadUsuariosList(); // Atualizar lista para remover seleção
         }
         
         // Funções do módulo Notas Fiscais

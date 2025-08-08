@@ -341,10 +341,36 @@ def processar_solicitacao_assistente(solicitacao_id: str) -> Dict[str, Any]:
 
 
 def gerar_resposta_simulada(pergunta: str, contexto: Dict[str, Any]) -> str:
-    """Gera uma resposta simulada para o assistente virtual"""
+    """Gera uma resposta simulada para o assistente virtual baseada no módulo atual"""
     
+    modulo = contexto.get("modulo", {}) if contexto else {}
+    module_type = modulo.get("type", "")
+    
+    # Se é um módulo específico, usar dados do módulo
+    if module_type == "Clientes":
+        dados = modulo.get("data", {})
+        cliente_nome = dados.get("nome", "cliente")
+        cliente_tipo = "empresa" if dados.get("tipo") == "pj" else "pessoa"
+        return f"Para cadastrar o CNPJ do {cliente_nome}, acesse o campo 'Documento' na aba de cadastro de clientes. Para {cliente_tipo}s jurídicas, este campo é obrigatório e deve seguir o formato XX.XXX.XXX/XXXX-XX."
+    
+    elif module_type == "Vendas":
+        return f"No módulo de vendas, você pode gerenciar pedidos, calcular totais e acompanhar o processo comercial. Use as abas para navegar entre listagem e cadastro de novas vendas."
+    
+    elif module_type == "Transportadoras":
+        return f"No cadastro de transportadoras, você pode gerenciar as empresas responsáveis pelo transporte. Preencha os dados como CNPJ, região de atuação e informações de contato."
+    
+    elif module_type == "Notas Fiscais":
+        return f"O módulo de notas fiscais permite emitir, consultar e gerenciar documentos fiscais. Você pode acompanhar o status das NFe e realizar cancelamentos quando necessário."
+    
+    elif module_type == "Usuários":
+        return f"Na gestão de usuários, você pode criar novos acessos, definir perfis e permissões. Configure o login, senha e nível de acesso de cada usuário do sistema."
+    
+    elif module_type == "Empresa":
+        return f"Os dados da empresa são fundamentais para o funcionamento do sistema. Mantenha atualizadas as informações de CNPJ, razão social e configurações fiscais."
+    
+    # Fallback para produtos ou dados genéricos
     produto = contexto.get("product", {}) if contexto else {}
-    produto_nome = produto.get("name", "produto")
+    produto_nome = produto.get("name", "item")
     produto_categoria = produto.get("category", "categoria não especificada")
     
     pergunta_lower = pergunta.lower()
@@ -370,38 +396,143 @@ def gerar_resposta_simulada(pergunta: str, contexto: Dict[str, Any]) -> str:
 
 # Funções auxiliares para análise de solicitações
 def detectar_categoria_solicitacao(pergunta: str) -> str:
-    """Detecta a categoria da solicitação baseada na pergunta"""
+    """Detecta a categoria da solicitação baseada na pergunta com contexto melhorado"""
     pergunta_lower = pergunta.lower()
     
-    if any(palavra in pergunta_lower for palavra in ["preço", "custo", "valor", "dinheiro"]):
-        return "pricing"
-    elif any(palavra in pergunta_lower for palavra in ["estoque", "quantidade", "inventário"]):
-        return "inventory"
-    elif any(palavra in pergunta_lower for palavra in ["venda", "marketing", "cliente"]):
-        return "sales_marketing"
-    elif any(palavra in pergunta_lower for palavra in ["fornecedor", "compra", "aquisição"]):
-        return "procurement"
-    elif any(palavra in pergunta_lower for palavra in ["cadastro", "registro", "dados"]):
-        return "data_management"
-    elif any(palavra in pergunta_lower for palavra in ["relatório", "análise", "dashboard"]):
-        return "reporting"
-    else:
-        return "general_inquiry"
+    # Categorias mais específicas e contextuais
+    categorias = {
+        "user_interface": [
+            "onde", "como encontrar", "como acessar", "onde fica", "onde está",
+            "botão", "campo", "formulário", "aba", "tela", "menu", "interface"
+        ],
+        "data_entry": [
+            "como inserir", "como adicionar", "como preencher", "cadastrar",
+            "criar", "novo", "inserir", "adicionar", "registrar", "incluir"
+        ],
+        "data_edit": [
+            "como alterar", "como editar", "como modificar", "atualizar",
+            "mudar", "corrigir", "editar", "modificar", "alterar"
+        ],
+        "data_search": [
+            "como buscar", "como encontrar", "como localizar", "procurar",
+            "pesquisar", "consultar", "visualizar", "listar", "ver"
+        ],
+        "data_delete": [
+            "como excluir", "como apagar", "como remover", "deletar",
+            "excluir", "apagar", "remover", "eliminar"
+        ],
+        "business_process": [
+            "processo", "fluxo", "workflow", "etapa", "procedimento",
+            "como fazer", "passos", "sequência", "operação"
+        ],
+        "reporting": [
+            "relatório", "relatórios", "dados", "informações", "análise",
+            "dashboard", "gráfico", "exportar", "imprimir"
+        ],
+        "fiscal_tax": [
+            "nota fiscal", "nfe", "nfce", "nfse", "imposto", "tributo",
+            "fiscal", "sefaz", "xml", "chave", "cancelar", "inutilizar"
+        ],
+        "financial": [
+            "preço", "valor", "custo", "dinheiro", "pagamento", "cobrança",
+            "faturamento", "financeiro", "total", "cálculo", "desconto"
+        ],
+        "inventory": [
+            "estoque", "quantidade", "produto", "item", "inventário",
+            "disponível", "saldo", "movimentação", "entrada", "saída"
+        ],
+        "customer_management": [
+            "cliente", "clientes", "contato", "relacionamento", "crm",
+            "pessoa", "empresa", "cnpj", "cpf", "endereço"
+        ],
+        "sales": [
+            "venda", "vendas", "pedido", "orçamento", "proposta",
+            "vendedor", "comissão", "meta", "pipeline"
+        ],
+        "user_access": [
+            "usuário", "login", "senha", "acesso", "permissão", "perfil",
+            "bloqueado", "ativo", "administrador", "segurança"
+        ],
+        "system_config": [
+            "configuração", "parâmetro", "setting", "empresa", "dados",
+            "sistema", "backup", "integração", "api"
+        ],
+        "error_troubleshooting": [
+            "erro", "problema", "bug", "falha", "não funciona", "quebrado",
+            "travou", "lento", "não carrega", "deu pau"
+        ],
+        "tutorial_help": [
+            "como", "tutorial", "ajuda", "explicar", "ensinar", "mostrar",
+            "exemplo", "dica", "orientação", "instrução"
+        ]
+    }
+    
+    # Verificar categoria por palavras-chave (mais específica primeiro)
+    for categoria, palavras in categorias.items():
+        if any(palavra in pergunta_lower for palavra in palavras):
+            return categoria
+    
+    # Análise contextual adicional
+    if "?" in pergunta:
+        if any(word in pergunta_lower for word in ["onde", "qual campo", "que campo"]):
+            return "user_interface"
+        elif any(word in pergunta_lower for word in ["como fazer", "como"]):
+            return "tutorial_help"
+        else:
+            return "general_inquiry"
+    
+    # Fallback para categorias gerais
+    return "general_inquiry"
 
 
 def detectar_subcategoria_solicitacao(pergunta: str, product_data: Dict[str, Any]) -> str:
-    """Detecta a subcategoria baseada na pergunta e dados do produto"""
+    """Detecta a subcategoria baseada na pergunta, dados e contexto do módulo"""
     categoria = detectar_categoria_solicitacao(pergunta)
-    product_category = product_data.get("category", "")
+    pergunta_lower = pergunta.lower()
     
-    if categoria == "pricing":
-        return f"pricing_{product_category}" if product_category else "pricing_general"
-    elif categoria == "inventory":
-        return f"inventory_{product_category}" if product_category else "inventory_general"
-    elif categoria == "sales_marketing":
-        return f"sales_{product_category}" if product_category else "sales_general"
-    else:
-        return f"{categoria}_general"
+    # Determinar módulo atual
+    module_type = product_data.get("type", "")
+    tela_atual = determinar_tela_atual(product_data)
+    
+    # Subcategorias específicas por módulo
+    if module_type:
+        module_suffix = module_type.lower().replace(" ", "_")
+        
+        # Subcategorias específicas baseadas no conteúdo da pergunta
+        if categoria == "user_interface":
+            if any(word in pergunta_lower for word in ["cnpj", "documento"]):
+                return f"field_location_{module_suffix}_documento"
+            elif any(word in pergunta_lower for word in ["email", "e-mail"]):
+                return f"field_location_{module_suffix}_email"
+            elif any(word in pergunta_lower for word in ["telefone", "fone"]):
+                return f"field_location_{module_suffix}_telefone"
+            elif any(word in pergunta_lower for word in ["endereco", "endereço"]):
+                return f"field_location_{module_suffix}_endereco"
+            else:
+                return f"interface_navigation_{module_suffix}"
+        
+        elif categoria == "data_entry":
+            return f"create_new_{module_suffix}"
+        
+        elif categoria == "data_edit":
+            return f"edit_existing_{module_suffix}"
+        
+        elif categoria == "business_process":
+            if "venda" in module_suffix:
+                return "sales_process_flow"
+            elif "fiscal" in module_suffix:
+                return "fiscal_process_flow"
+            elif "cliente" in module_suffix:
+                return "customer_process_flow"
+            else:
+                return f"process_{module_suffix}"
+    
+    # Subcategorias baseadas na tela atual
+    if tela_atual:
+        return f"{categoria}_{tela_atual}"
+    
+    # Fallback
+    return f"{categoria}_general"
 
 
 def extrair_palavras_chave(pergunta: str) -> List[str]:
@@ -532,44 +663,173 @@ def detectar_sentimento(pergunta: str) -> str:
 
 
 def gerar_tags(pergunta: str, product_data: Dict[str, Any]) -> List[str]:
-    """Gera tags relevantes para a solicitação"""
+    """Gera tags relevantes para a solicitação baseadas na tela atual e contexto"""
     tags = []
-    
-    # Tags baseadas na categoria do produto
-    if product_data.get("category"):
-        tags.append(product_data["category"])
-    
-    # Tags baseadas na pergunta
     pergunta_lower = pergunta.lower()
     
-    tags_map = {
-        "preço": ["pricing", "cost"],
-        "estoque": ["inventory", "stock"],
-        "venda": ["sales", "revenue"],
-        "marketing": ["marketing", "promotion"],
-        "fornecedor": ["supplier", "vendor"],
-        "cadastro": ["registration", "data"],
-        "urgente": ["urgent", "priority"],
-        "importante": ["important", "critical"]
+    # Determinar tela atual para tags específicas
+    tela_atual = determinar_tela_atual(product_data)
+    
+    # Tags específicas por módulo/tela
+    tags_por_modulo = {
+        "clientes": [
+            "clientes", "customers", "crm", "cadastro_cliente", "pessoa_fisica", "pessoa_juridica",
+            "cnpj", "cpf", "endereco", "contato", "relacionamento", "base_clientes"
+        ],
+        "produtos": [
+            "produtos", "products", "inventory", "catalogo", "estoque", "ean", "codigo_produto",
+            "categoria", "preco", "descricao", "imagem", "referencia", "gestao_produtos"
+        ],
+        "vendas": [
+            "vendas", "sales", "revenue", "faturamento", "pedidos", "orcamento", "proposta",
+            "comissao", "meta", "pipeline", "funil", "conversao", "vendedor", "gestao_vendas"
+        ],
+        "transportadoras": [
+            "transportadoras", "shipping", "logistics", "frete", "entrega", "transporte",
+            "logistica", "prazo", "rastreamento", "correios", "transportadora", "distribuicao"
+        ],
+        "notas_fiscais": [
+            "notas_fiscais", "fiscal", "nfe", "nfce", "nfse", "sefaz", "autorizacao",
+            "cancelamento", "inutilizacao", "tributacao", "impostos", "chave_acesso", "xml"
+        ],
+        "usuarios": [
+            "usuarios", "users", "acesso", "permissoes", "perfil", "login", "senha",
+            "administrador", "vendedor", "operador", "seguranca", "autenticacao", "roles"
+        ],
+        "empresa": [
+            "empresa", "company", "dados_empresa", "cnpj", "razao_social", "inscricao_estadual",
+            "configuracao", "parametros", "sede", "filial", "empresa_dados", "corporativo"
+        ]
     }
     
-    for palavra, tag_list in tags_map.items():
+    # Adicionar tags do módulo atual
+    if tela_atual in tags_por_modulo:
+        tags.extend(tags_por_modulo[tela_atual])
+    
+    # Tags baseadas em palavras-chave da pergunta (mais específicas)
+    palavras_chave_contextuais = {
+        # Operações CRUD
+        "como": ["tutorial", "howto", "instrucoes"],
+        "criar": ["create", "novo", "adicionar", "cadastrar"],
+        "editar": ["edit", "alterar", "modificar", "atualizar"],
+        "excluir": ["delete", "remover", "apagar"],
+        "buscar": ["search", "localizar", "encontrar", "consultar"],
+        "listar": ["list", "visualizar", "exibir", "mostrar"],
+        
+        # Problemas e dúvidas
+        "erro": ["error", "problema", "bug", "falha"],
+        "duvida": ["question", "help", "ajuda", "suporte"],
+        "nao": ["not_working", "problema", "dificuldade"],
+        "funciona": ["funcionamento", "operacao", "uso"],
+        
+        # Campos específicos por contexto
+        "cnpj": ["documento", "fiscal", "empresa"],
+        "cpf": ["documento", "pessoa_fisica", "individual"],
+        "email": ["contato", "comunicacao", "endereco_eletronico"],
+        "telefone": ["contato", "comunicacao", "fone"],
+        "endereco": ["localizacao", "address", "cep"],
+        "senha": ["password", "acesso", "login", "seguranca"],
+        "preco": ["valor", "custo", "money", "financeiro"],
+        "quantidade": ["qtd", "estoque", "inventory"],
+        "data": ["date", "periodo", "tempo"],
+        "status": ["situacao", "estado", "condicao"],
+        
+        # Ações específicas do ERP
+        "vender": ["comercial", "negocio", "revenue"],
+        "comprar": ["aquisicao", "fornecedor", "procurement"],
+        "entregar": ["delivery", "shipping", "logistica"],
+        "faturar": ["billing", "invoice", "cobranca"],
+        "pagar": ["payment", "financeiro", "contas"],
+        "receber": ["receivables", "cobranca", "entrada"],
+        
+        # Relatórios e consultas
+        "relatorio": ["report", "dashboard", "analytics"],
+        "consulta": ["query", "search", "lookup"],
+        "historico": ["history", "log", "tracking"],
+        "backup": ["backup", "copia", "seguranca"],
+        
+        # Integrações
+        "api": ["integration", "webservice", "endpoint"],
+        "xml": ["arquivo", "dados", "export"],
+        "excel": ["planilha", "import", "export"],
+        "pdf": ["documento", "impressao", "relatorio"],
+        
+        # Urgência e prioridade
+        "urgente": ["priority", "critico", "importante"],
+        "rapido": ["fast", "agil", "quick"],
+        "lento": ["slow", "performance", "otimizacao"]
+    }
+    
+    # Adicionar tags baseadas em palavras-chave contextuais
+    for palavra, tag_list in palavras_chave_contextuais.items():
         if palavra in pergunta_lower:
             tags.extend(tag_list)
     
-    # Tags do tipo de produto
-    product_type = product_data.get("selectedType", "")
-    if "eletrônico" in product_type.lower():
-        tags.extend(["electronics", "technology"])
-    elif "roupa" in product_type.lower():
-        tags.extend(["clothing", "fashion"])
-    elif "livro" in product_type.lower():
-        tags.extend(["books", "education"])
+    # Tags especiais baseadas no tipo de dados do módulo atual
+    if product_data.get("type"):
+        module_type = product_data.get("type", "")
+        
+        # Tags específicas por tipo de módulo
+        if module_type == "Clientes":
+            if any(word in pergunta_lower for word in ["cnpj", "empresa", "juridica"]):
+                tags.extend(["pessoa_juridica", "corporativo", "b2b"])
+            elif any(word in pergunta_lower for word in ["cpf", "fisica", "individual"]):
+                tags.extend(["pessoa_fisica", "individual", "b2c"])
+                
+        elif module_type == "Produtos":
+            if any(word in pergunta_lower for word in ["categoria", "tipo"]):
+                tags.extend(["classificacao", "taxonomia"])
+            if any(word in pergunta_lower for word in ["estoque", "quantidade"]):
+                tags.extend(["inventory_management", "stock_control"])
+                
+        elif module_type == "Vendas":
+            if any(word in pergunta_lower for word in ["produto", "item"]):
+                tags.extend(["produtos_venda", "carrinho", "itens"])
+            if any(word in pergunta_lower for word in ["total", "valor"]):
+                tags.extend(["calculo", "pricing", "financeiro"])
+                
+        elif module_type == "Notas Fiscais":
+            if any(word in pergunta_lower for word in ["nfe", "eletronica"]):
+                tags.extend(["nfe", "sefaz", "digital"])
+            if any(word in pergunta_lower for word in ["cancelar", "inutilizar"]):
+                tags.extend(["cancelamento", "fiscal_operations"])
+                
+        elif module_type == "Usuários":
+            if any(word in pergunta_lower for word in ["admin", "administrador"]):
+                tags.extend(["admin_rights", "super_user"])
+            if any(word in pergunta_lower for word in ["perfil", "permissao"]):
+                tags.extend(["access_control", "authorization"])
     
-    # Adicionar tag do sistema
-    tags.append("mock_erp")
+    # Tags do contexto de dados específicos
+    if product_data.get("data"):
+        data = product_data.get("data", {})
+        
+        # Se há dados preenchidos, adicionar tags de "edicao"
+        if any(str(value).strip() for value in data.values() if value):
+            tags.extend(["edicao", "dados_preenchidos", "formulario_ativo"])
+        else:
+            tags.extend(["novo_registro", "formulario_vazio", "criacao"])
     
-    return list(set(tags))[:10]  # Máximo 10 tags únicas
+    # Adicionar tags do sistema e ambiente
+    tags.extend(["mock_erp", "sistema_gestao", "erp", "web_interface"])
+    
+    # Tags de complexidade baseadas no tamanho e tipo da pergunta
+    if len(pergunta.split()) <= 3:
+        tags.append("pergunta_simples")
+    elif len(pergunta.split()) <= 8:
+        tags.append("pergunta_media")
+    else:
+        tags.append("pergunta_complexa")
+    
+    # Tags de categoria de pergunta
+    if "?" in pergunta:
+        tags.append("duvida_direta")
+    if any(word in pergunta_lower for word in ["como", "onde", "quando", "porque", "qual"]):
+        tags.append("pergunta_explicativa")
+    if any(word in pergunta_lower for word in ["preciso", "quero", "gostaria"]):
+        tags.append("solicitacao_acao")
+    
+    return list(set(tags))[:15]  # Máximo 15 tags únicas (aumentado para maior contexto)
 
 
 def determinar_tela_atual(product_data: Dict[str, Any]) -> str:
@@ -663,10 +923,44 @@ async def enviar_para_assistente_ia(
     usuario_id = str(user_data.get("id")) if user_data and user_data.get("id") else None
     usuario_nome = user_data.get("name") if user_data else "Usuário Anônimo"
     
-    # Criar contexto da conversa com informações do produto
+    # Determinar a tela/módulo atual baseado no tipo de dados
+    tela_atual = determinar_tela_atual(product_data)
+    module_type = product_data.get("type", "")
+    
+    # Criar contexto da conversa baseado no módulo atual
+    if module_type == "Clientes":
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre gestão de clientes"
+        if product_data.get("data", {}).get("nome"):
+            contexto_descricao += f" - cliente: {product_data['data']['nome']}"
+    elif module_type == "Vendas":
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre vendas"
+        if product_data.get("data", {}).get("vendaCliente"):
+            contexto_descricao += f" - venda para: {product_data['data']['vendaCliente']}"
+    elif module_type == "Transportadoras":
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre transportadoras"
+        if product_data.get("data", {}).get("transpNome"):
+            contexto_descricao += f" - transportadora: {product_data['data']['transpNome']}"
+    elif module_type == "Notas Fiscais":
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre notas fiscais"
+        if product_data.get("data", {}).get("nfNumero"):
+            contexto_descricao += f" - NF: {product_data['data']['nfNumero']}"
+    elif module_type == "Usuários":
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre gestão de usuários"
+        if product_data.get("data", {}).get("usuarioNome"):
+            contexto_descricao += f" - usuário: {product_data['data']['usuarioNome']}"
+    elif module_type == "Empresa":
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre dados da empresa"
+        if product_data.get("data", {}).get("empresaNome"):
+            contexto_descricao += f" - empresa: {product_data['data']['empresaNome']}"
+    else:
+        # Fallback para produtos ou dados genéricos
+        contexto_descricao = f"Usuário {usuario_nome} consultando sobre produto {product_data.get('name', 'N/A')} da categoria {product_data.get('category', 'N/A')}"
+    
+    # Criar contexto da conversa com informações do módulo
     contexto_conversa = {
         "usuario": user_data,
-        "produto": product_data,
+        "modulo": product_data,
+        "tela_atual": tela_atual,
         "sessao_id": f"erp_session_{int(time.time())}",
         "origem": "mock_erp_dashboard",
         "timestamp": datetime.now().isoformat()
@@ -680,24 +974,21 @@ async def enviar_para_assistente_ia(
     palavras_chave = extrair_palavras_chave(user_question)
     topicos_abordados = extrair_topicos_abordados(user_question, product_data)
     
-    # Determinar a tela/módulo atual baseado no tipo de produto
-    tela_atual = determinar_tela_atual(product_data)
-    
     # Preparar payload completo seguindo o formato esperado pela API
     payload = {
         "solicitacao_usuario": user_question,
         "usuario_id": usuario_id,
-        "contexto_conversa": f"Usuário {usuario_nome} consultando sobre produto {product_data.get('name', 'N/A')} da categoria {product_data.get('category', 'N/A')}",
+        "contexto_conversa": contexto_descricao,
         "historico_mensagens": [user_question],
         "categoria_solicitacao": categoria_solicitacao,
         "tags": gerar_tags(user_question, product_data),
-        "produto_nome": product_data.get("name", ""),
-        "produto_categoria": product_data.get("category", ""),
+        "modulo_nome": module_type or "Sistema",
+        "modulo_categoria": tela_atual,
         "complexidade": detectar_complexidade(user_question),
         "sentimento": detectar_sentimento(user_question),
         "palavras_chave": palavras_chave,
         "topicos_abordados": topicos_abordados,
-        # Campos obrigatórios adicionais
+        # Campos específicos do módulo
         "tela": tela_atual,
         "resposta_assistente": ""  # Campo obrigatório, será preenchido pela IA
     }
@@ -707,7 +998,7 @@ async def enviar_para_assistente_ia(
         solicitacao_local = criar_solicitacao_assistente_virtual(
             user_data=user_data,
             pergunta=user_question,
-            contexto_produto={"product": product_data}
+            contexto_produto={"modulo": product_data}
         )
         
         # Atualizar status para processando
@@ -790,7 +1081,7 @@ async def enviar_para_assistente_ia(
                     "error": error_msg,
                     "request_id": request_id,
                     "local_id": solicitacao_local["id"],
-                    "fallback_response": gerar_resposta_simulada(user_question, {"product": product_data})
+                    "fallback_response": gerar_resposta_simulada(user_question, {"modulo": product_data})
                 }
     
     except httpx.TimeoutException:
